@@ -24,6 +24,8 @@ package {
 	import htmlelements.DailyMotionElement;
 	import htmlelements.HLSMediaElement;
 
+    import flash.utils.getQualifiedClassName;
+
 	[SWF(backgroundColor="0x000000")] // Set SWF background color
 
 
@@ -64,7 +66,7 @@ package {
 		private var _connectionName:String;
 
 		// CONTROLS
-		private var _alwaysShowControls:Boolean;
+		private var _controlsEnabled:Boolean;
 		private var _controlsStyle:String;
 		private var _controlsAutoHide:Boolean = true;
 		private var _controlBar:MovieClip;
@@ -158,7 +160,7 @@ package {
 			_enableSmoothing = (params['smoothing'] != undefined) ? (String(params['smoothing']) == "true") : false;
 			_startVolume = (params['startvolume'] != undefined) ? (parseFloat(params['startvolume'])) : 0.8;
 			_preload = (params['preload'] != undefined) ? params['preload'] : "none";
-			_alwaysShowControls = (params['controls'] != undefined) ? (String(params['controls']) == "true") : false;
+			_controlsEnabled = (params['controls'] != undefined) ? (String(params['controls']) == "true") : false;
 			_controlsStyle = (params['controlstyle'] != undefined) ? (String(params['controlstyle'])) : ""; // blank or "floating"
 			_controlsAutoHide = (params['autohide'] != undefined) ? (String(params['autohide']) == "true") : true;
 			_scrubTrackColor = (params['scrubtrackcolor'] != undefined) ? (String(params['scrubtrackcolor'])) : "0x333333";
@@ -170,7 +172,7 @@ package {
 			_fill = (params['fill'] != undefined) ? (String(params['fill']) == "true") : false;
 
 			// always show controls for audio files
-			if (!_isVideo && _alwaysShowControls)
+			if (!_isVideo && _controlsEnabled)
 				_controlsAutoHide = false;
 
 			if (isNaN(_timerRate))
@@ -184,7 +186,7 @@ package {
 
 			//_autoplay = true;
 			//_mediaUrl  = "http://mediafiles.dts.edu/chapel/mp4/20100609.mp4";
-			//_alwaysShowControls = true;
+			//_controlsEnabled = true;
 			//_mediaUrl  = "../media/Parades-PastLives.mp3";
 			//_mediaUrl  = "../media/echo-hereweare.mp4";
 
@@ -194,7 +196,7 @@ package {
 			//_mediaUrl = "http://www.youtube.com/watch?feature=player_embedded&v=yyWWXSwtPP0"; // hosea
 			//_mediaUrl = "http://www.youtube.com/watch?feature=player_embedded&v=m5VDDJlsD6I"; // railer with notes
 
-			//_alwaysShowControls = true;
+			//_controlsEnabled = true;
 
 			//_debug=true;
 
@@ -248,8 +250,13 @@ package {
 				_mediaElement = new AudioElement(this, _autoplay, _preload, _timerRate, _startVolume);
 			}
 
-			buildControls();
-						
+			if (_controlsEnabled) {
+				buildControls();
+			}
+			else {
+				removeControls();
+			}
+			
 			logMessage("stage: " + stage.stageWidth + "x" + stage.stageHeight);
 			logMessage("file: " + _mediaUrl);
 			logMessage("autoplay: " + _autoplay.toString());
@@ -258,6 +265,7 @@ package {
 			logMessage("smoothing: " + _enableSmoothing.toString());
 			logMessage("timerrate: " + _timerRate.toString());
 			logMessage("displayState: " +(stage.hasOwnProperty("displayState")).toString());
+			logMessage("_mediaElement: " + getQualifiedClassName(_mediaElement));
 
 			// attach javascript
 			logMessage("ExternalInterface.available: " + ExternalInterface.available.toString());
@@ -270,7 +278,7 @@ package {
 			if (_output != null) {
 				addChild(_output);
 			}
-			if (_alwaysShowControls) {
+			if (_controlsEnabled) {
 				positionControls();
 				// Fire this once just to set the width on some dynamically sized scrub bar items;
 				_scrubBar.scaleX=0;
@@ -285,9 +293,11 @@ package {
 						ExternalInterface.addCallback("loadMedia", loadMedia);
 						ExternalInterface.addCallback("pauseMedia", pauseMedia);
 						ExternalInterface.addCallback("stopMedia", stopMedia);
-
+						ExternalInterface.addCallback("getType", getType);
 						ExternalInterface.addCallback("setSrc", setSrc);
 						ExternalInterface.addCallback("setCurrentTime", setCurrentTime);
+						ExternalInterface.addCallback("getDuration", getDuration);
+						ExternalInterface.addCallback("currentTime", currentTime);
 						ExternalInterface.addCallback("setVolume", setVolume);
 						ExternalInterface.addCallback("setMuted", setMuted);
 
@@ -423,15 +433,15 @@ package {
 				_volumeUnMuted.visible=true;
 			}
 
-			_controlBar.visible = _alwaysShowControls;
+			_controlBar.visible = _controlsEnabled;
 
 			setControlDepth();
 		}
 
 		public function setControlDepth():void {
-			//if (!_alwaysShowControls) {
-			//	return;
-			//}
+			if (!_controlsEnabled) {
+				return;
+			}
 			// put these on top
 			if (_output != null) {
 				addChild(_output);
@@ -441,8 +451,6 @@ package {
 		}
 
 		public function logMessage(txt:String):void {
-			ExternalInterface.call("console.log", txt);
-			
 			if (_output != null) {
 				_output.appendText(txt + "\n");
 				if (ExternalInterface.objectID != null && ExternalInterface.objectID.toString() != "") {
@@ -518,7 +526,7 @@ package {
 			// if mouse is in the video area
 			if (_controlsAutoHide && (mouseX>=0 && mouseX<=stage.stageWidth) && (mouseY>=0 && mouseY<=stage.stageHeight)) {
 				// This could be move to a nice fade at some point...
-				_controlBar.visible = (_alwaysShowControls || _isFullScreen);
+				_controlBar.visible = _isFullScreen;
 				_isMouseActive = true;
 				_idleTime = 0;
 				_timer.reset();
@@ -612,12 +620,9 @@ package {
 		}
 
 		private function positionControls(forced:Boolean=false):void {
-			//if (!_alwaysShowControls) {
-			//	return;
-			//}
-			
-			
-			
+			if (!_controlsEnabled) {
+				return;
+			}
 			var contWidth:Number;
 			var contHeight:Number;
 			if (_isFullScreen) {
@@ -747,10 +752,10 @@ package {
 
 			repositionVideo();
 
-			//if (_alwaysShowControls) {
+			if (_controlsEnabled) {
+				updateControls(HtmlMediaEvent.FULLSCREENCHANGE);
 				_controlBar.visible = true;
-				updateControls(HtmlMediaEvent.FULLSCREENCHANGE);				
-			//}
+			}
 
 			_isFullScreen = true;
 		}
@@ -760,7 +765,7 @@ package {
 
 			repositionVideo();
 
-			if (!_alwaysShowControls) {
+			if (_controlsEnabled) {
 				_controlBar.visible = false;
 			}
 
@@ -804,9 +809,9 @@ package {
 			hideFullscreenButton();
 
 			try {
-				//if (_alwaysShowControls) {
+				if (_controlsEnabled) {
 					_controlBar.visible = true;
-				//}
+				}
 				setFullscreen(true);
 				repositionVideo();
 				positionControls();
@@ -818,22 +823,22 @@ package {
 		public function stageFullScreenChanged(e:FullScreenEvent):void {
 			logMessage("fullscreen event: " + e.fullScreen.toString());
 
-			_isFullScreen = e.fullScreen;
-			
-			if (!_isFullScreen) {
-				_controlBar.visible = _alwaysShowControls;
-			}			
-			
-			repositionVideo();			
 			hideFullscreenButton();
+			_isFullScreen = e.fullScreen;
 
 			sendEvent(HtmlMediaEvent.FULLSCREENCHANGE, "isFullScreen:" + e.fullScreen );
 
-
+			if (_controlsEnabled && !e.fullScreen) {
+				_controlBar.visible = _controlsEnabled;
+			}
 		}
 		// END: Fullscreen
 
 		// START: external interface
+		public function  getType():String {
+			logMessage("gettype " +_mediaElement.getType());
+			return _mediaElement.getType();
+		}
 		public function playMedia():void {
 			logMessage("play");
 			_mediaElement.play();
@@ -858,7 +863,14 @@ package {
 			logMessage("stop");
 			_mediaElement.stop();
 		}
-
+		public function getDuration():Number {
+			
+			return _mediaElement.duration();
+		}
+		public function currentTime():Number {
+			
+			return _mediaElement.currentTime();
+		}
 		public function setCurrentTime(time:Number):void {
 			logMessage("seek: " + time.toString());
 			_mediaElement.setCurrentTime(time);
@@ -888,8 +900,8 @@ package {
 
 		public function positionFullscreenButton(x:Number, y:Number, visibleAndAbove:Boolean ):void {
 			logMessage("position FS: " + x.toString() + "x" + y.toString());
-			//if (!_fullscreenButton)
-			//	return;
+			if (!_fullscreenButton)
+				return;
 
 			// position just above
 			if (visibleAndAbove) {
@@ -1024,11 +1036,11 @@ package {
 
 
 		private function updateControls(eventName:String):void {
-			//if (!_controls.visible) {
-			//	return;
-			//}
+			if (!_controlsEnabled) {
+				return;
+			}
 
-			logMessage("updating controls");
+			//trace("updating controls");
 			try {
 				switch (eventName) {
 					case "pause":

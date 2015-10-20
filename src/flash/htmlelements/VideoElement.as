@@ -328,7 +328,9 @@ package htmlelements {
 				_playWhenConnected = false;
 			}
 		}
-
+		public function  getType(): String{
+			return "VOD"; 
+		}
 		public function play():void {
 			if (!_hasStartedPlaying && !_isConnected ) {
 				if( !_playWhenConnected ) {

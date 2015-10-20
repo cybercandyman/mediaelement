@@ -274,7 +274,9 @@
 				return _volume;
 			}
 		}
-
+		public function  getType(): String{
+			return "VOD"; 
+		}
 		public function setMuted(muted:Boolean):void {
 			// ignore if already set
 			if ( (muted && _isMuted) || (!muted && !_isMuted))

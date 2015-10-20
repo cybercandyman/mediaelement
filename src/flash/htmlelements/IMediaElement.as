@@ -27,6 +27,7 @@ package htmlelements {
 
 		function currentTime():Number;
 
+		function getType():String;
 		/**
 		 * Simplified version of HTML5 seekable attribute, returns upper time bound for
 		 * seek or duration() if seek can be any position

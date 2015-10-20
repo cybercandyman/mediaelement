@@ -131,6 +131,12 @@
 			return _videoWidth;
 		}
 
+
+
+		public function  getType(): String{
+			return _hls.type; 
+		}
+
 		public function play():void {
 			//Log.txt("HLSMediaElement:play");
 			if(!_isManifestLoaded) {
@@ -254,6 +260,7 @@
 				",bufferedTime:" + _bufferedTime +
 				",videoWidth:" + _videoWidth +
 				",videoHeight:" + _videoHeight +
+				",videoType:'"+ _hls.type +"'" +
 				"";
 			_element.sendEvent(eventName, values);
 		}

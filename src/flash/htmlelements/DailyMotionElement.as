@@ -287,7 +287,9 @@ package htmlelements {
 				player.pauseVideo();
 			}
 		}
-
+		public function  getType(): String{
+			return "VOD"; 
+		}
 		public function setCurrentTime(pos:Number):void {
 			player.seekTo(pos);
 		}

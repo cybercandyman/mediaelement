@@ -10,7 +10,7 @@
 #   https://helpx.adobe.com/flash-player/kb/archived-flash-player-versions.html
 #   The file must be placed in flex_sdk_4.6/frameworks/libs/player/10.1/playerglobal.swc
 
-flex_path="./src/flash/flex_sdk_4.6"
+flex_path="./src/flash/flex"
 target_version="10.1"
 builds[0]="-define+=CONFIG::cdnBuild,true -define+=CONFIG::debugBuild,true -o local-build/flashmediaelement-debug.swf"
 builds[1]="-define+=CONFIG::cdnBuild,true -define+=CONFIG::debugBuild,false -o local-build/flashmediaelement-cdn.swf"

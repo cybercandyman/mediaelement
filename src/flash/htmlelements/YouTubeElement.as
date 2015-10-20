@@ -334,7 +334,9 @@ package htmlelements {
 		public function getVolume():Number {
 			return player.getVolume()*100;
 		}
-
+		public function  getType(): String{
+			return "VOD"; 
+		}
 		public function setMuted(muted:Boolean):void {
 			if (muted) {
 				player.mute();
