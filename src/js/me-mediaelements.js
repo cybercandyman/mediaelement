@@ -93,7 +93,15 @@ mejs.PluginMediaElement.prototype = {
 	muted: false,
 	volume: 1,
 	currentTime: 0,
-
+	getType : function() {
+		if (this.pluginApi != null) {
+			if (this.pluginType == 'youtube' || this.pluginType == 'vimeo') {
+				return "VOD";
+			} else {
+				return this.pluginApi.getType();
+			}
+		}
+	},
 	// HTML5 methods
 	play: function () {
 		if (this.pluginApi != null) {
