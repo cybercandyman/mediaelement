@@ -51,6 +51,9 @@ mejs.HtmlMediaElement = {
 	setVideoSize: function (width, height) {
 		this.width = width;
 		this.height = height;
+	},
+	getType : function() {
+		return "VOD";
 	}
 };
 
