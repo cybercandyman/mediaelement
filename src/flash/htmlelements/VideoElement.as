@@ -327,6 +327,7 @@ package htmlelements {
 				play();
 				_playWhenConnected = false;
 			}
+			sendEvent(HtmlMediaEvent.LOADEDMETADATA);
 		}
 		public function  getType(): String{
 			return "VOD"; 
